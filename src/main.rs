@@ -15,6 +15,25 @@ struct Card {
     suit: Suit,
 }
 
+impl Card {
+    fn to_string(self) -> String {
+        let s = match self.suit {
+            Suit::HEART => "Heart",
+            Suit::SPADE => "Spade",
+            Suit::CLUB => "Club",
+            Suit::DIAMOND => "Diamond",
+        };
+        let string_val = self.value.to_string();
+        let val = match self.value {
+            11 => "J",
+            12 => "Q",
+            13 => "K",
+            _ => &string_val,
+        };
+        format!("{},{}", s, val)
+    }
+}
+
 struct Stack {
     stack: Vec<Card>,
 }
@@ -63,20 +82,7 @@ fn create_deck() -> Stack {
 fn print_stack(mut stack: Stack) {
     while !stack.is_empty() {
         let card = stack.pop().unwrap();
-        let s = match card.suit {
-            Suit::HEART => "Heart",
-            Suit::SPADE => "Spade",
-            Suit::CLUB => "Club",
-            Suit::DIAMOND => "Diamond",
-        };
-        let string_val = card.value.to_string();
-        let val = match card.value {
-            11 => "J",
-            12 => "Q",
-            13 => "K",
-            _ => &string_val,
-        };
-        println!("{},{}", s, val);
+        println!("{}", card.to_string());
     }
 }
 

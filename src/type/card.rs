@@ -1,20 +1,19 @@
-
 #[derive(Clone, Copy)]
-enum Suit {
+pub enum Suit {
     CLUB,
     DIAMOND,
     SPADE,
     HEART,
 }
 
-struct Card {
-    value: i16,
-    suit: Suit,
-    known: bool,
+pub struct Card {
+    pub value: i16,
+    pub suit: Suit,
+    pub known: bool,
 }
 
 impl Card {
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         let s = match self.suit {
             Suit::HEART => "Heart",
             Suit::SPADE => "Spade",

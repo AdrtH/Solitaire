@@ -1,97 +1,12 @@
 use std::f32;
 
-use rand::seq::SliceRandom;
-use rand::thread_rng;
 use raylib::ffi::Rectangle;
 use raylib::prelude::*;
 
 pub mod r#type;
+use crate::r#type::board::*;
 use crate::r#type::card::*;
-
-struct Stack {
-    stack: Vec<Card>,
-}
-
-impl Stack {
-    fn new() -> Self {
-        Stack { stack: Vec::new() }
-    }
-
-    fn pop(&mut self) -> Option<Card> {
-        self.stack.pop()
-    }
-
-    fn push(&mut self, item: Card) {
-        self.stack.push(item)
-    }
-
-    fn is_empty(&self) -> bool {
-        self.stack.is_empty()
-    }
-
-    fn length(&self) -> usize {
-        self.stack.len()
-    }
-
-    fn peek(&self) -> Option<&Card> {
-        self.stack.last()
-    }
-
-    fn shuffle(&mut self) {
-        let mut rng = thread_rng();
-        self.stack.shuffle(&mut rng);
-    }
-}
-
-const NB_FOND: usize = 4;
-const NB_PILES: usize = 7;
-
-struct Board {
-    deck: Stack,
-    playing: Stack,
-    fondation: [Stack; NB_FOND],
-    piles: [Stack; NB_PILES],
-}
-
-impl Board {
-    fn new() -> Self {
-        const STACK_NONE: Stack = Stack { stack: Vec::new() };
-        Board {
-            deck: create_deck(),
-            playing: Stack::new(),
-            fondation: {
-                let mut fond: [Stack; 4] = [STACK_NONE; 4];
-                for i in 0..3 {
-                    fond[i] = Stack::new();
-                }
-                fond
-            },
-            piles: {
-                let mut pil: [Stack; 7] = [STACK_NONE; 7];
-                for i in 0..3 {
-                    pil[i] = Stack::new();
-                }
-                pil
-            },
-        }
-    }
-
-    fn mov(from: &Stack, to: &Stack, size: usize) {}
-}
-
-fn create_deck() -> Stack {
-    let mut deck = Stack::new();
-    for j in [Suit::CLUB, Suit::DIAMOND, Suit::SPADE, Suit::HEART] {
-        for i in 1..14 {
-            deck.push(Card {
-                value: i,
-                suit: j,
-                known: false,
-            });
-        }
-    }
-    deck
-}
+use crate::r#type::stack::*;
 
 fn print_stack(mut stack: Stack) {
     while !stack.is_empty() {
@@ -152,13 +67,13 @@ fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: i32, y: i32) {
 }
 
 fn display_board(board: &Board, d: &mut RaylibDrawHandle) {
-    display_stack(&board.deck, d, 0, 0);
-    display_stack(&board.playing, d, 1, 0);
+    display_stack(board.get_deck(), d, 0, 0);
+    display_stack(board.get_playing(), d, 1, 0);
     for i in 0..NB_FOND {
-        display_stack(&board.fondation[i], d, i as i32 + 3, 0);
+        display_stack(board.get_fondation(i), d, i as i32 + 3, 0);
     }
     for i in 0..NB_PILES {
-        display_stack(&board.piles[i], d, i as i32, 1);
+        display_stack(board.get_pile(i), d, i as i32, 1);
     }
 }
 

@@ -1,6 +1,10 @@
 use std::f32;
+use std::os::raw::c_char;
 
+use raylib::ffi::DrawTexture;
+use raylib::ffi::LoadTexture;
 use raylib::ffi::Rectangle;
+use raylib::ffi::Texture2D;
 use raylib::prelude::*;
 
 pub mod r#type;
@@ -35,34 +39,41 @@ fn compute_card_dimensions(d: &RaylibDrawHandle) -> (f32, f32, f32) {
     (card_width, card_height, hor_offset)
 }
 
+// TODO: put textures in Card module
+static mut texture: Option<Texture2D> = None;
+
 fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: i32, y: i32) {
     let (card_width, card_height, hor_offset) = compute_card_dimensions(&d);
     let card_hor_offset = card_width * (1.0 - CARD_FILLING_PERC) / 2.0;
     let card_ver_offset = card_height * (1.0 - CARD_FILLING_PERC) / 2.0;
+    let position = Rectangle {
+        x: card_hor_offset + hor_offset + card_width * x as f32,
+        y: card_ver_offset + card_height * y as f32,
+        width: card_width * CARD_FILLING_PERC,
+        height: card_height * CARD_FILLING_PERC,
+    };
     if stack.is_empty() {
-        d.draw_rectangle_rounded(
-            Rectangle {
-                x: card_hor_offset + hor_offset + card_width * x as f32,
-                y: card_ver_offset + card_height * y as f32,
-                width: card_width * CARD_FILLING_PERC,
-                height: card_height * CARD_FILLING_PERC,
-            },
-            0.5,
-            10,
-            Color::DARKGREEN,
-        );
+        d.draw_rectangle_rounded(position, 0.5, 10, Color::DARKGREEN);
     } else {
-        d.draw_rectangle_rounded(
-            Rectangle {
-                x: card_hor_offset + hor_offset + card_width * x as f32,
-                y: card_ver_offset + card_height * y as f32,
-                width: card_width * CARD_FILLING_PERC,
-                height: card_height * CARD_FILLING_PERC,
-            },
-            0.5,
-            10,
-            Color::WHITE,
-        );
+        // TODO: factor out in display card
+        // so that you can easily check is known or not and change texture as needed
+        unsafe {
+            let mut t = texture.unwrap();
+            t.height = position.height as i32;
+            t.width = position.width as i32;
+            DrawTexture(
+                t,
+                position.x as i32,
+                position.y as i32,
+                // TODO: find a better way to do this because raylib rs sucks
+                raylib::ffi::Color {
+                    r: 0xFF,
+                    g: 0xFF,
+                    b: 0xFF,
+                    a: 0xFF,
+                },
+            );
+        }
     }
 }
 
@@ -84,6 +95,12 @@ fn main() {
         .resizable()
         .build();
     let board = Board::new();
+    unsafe {
+        texture = Some(LoadTexture(
+            "cards/svg_playing_cards/backs/png_96_dpi/red2.png\0".as_ptr() as *const c_char,
+        ))
+    };
+    // rl.load_render_texture(&thread, 50, 50);
     while !rl.window_should_close() {
         let mut d = rl.begin_drawing(&thread);
 

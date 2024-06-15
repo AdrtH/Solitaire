@@ -1,6 +1,6 @@
 use crate::*;
 
-pub const NB_FOND: usize = 5;
+pub const NB_FOND: usize = 4;
 pub const NB_PILES: usize = 7;
 
 pub struct Board {

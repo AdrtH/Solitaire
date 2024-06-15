@@ -13,8 +13,12 @@ pub struct Board {
 impl Board {
     pub fn new() -> Self {
         const STACK_NONE: Stack = Stack { stack: Vec::new() };
-        Board {
-            deck: create_deck(),
+        let mut board = Board {
+            deck: {
+                let mut deck = create_deck();
+                deck.shuffle();
+                deck
+            },
             playing: Stack::new(),
             fondation: {
                 let mut fond: [Stack; NB_FOND] = [STACK_NONE; NB_FOND];
@@ -30,7 +34,11 @@ impl Board {
                 }
                 pil
             },
+        };
+        for i in 0..NB_PILES {
+            Board::mov(&mut board.deck, &mut board.piles[i], i + 1);
         }
+        board
     }
 
     pub fn get_deck(&self) -> &Stack {
@@ -49,5 +57,13 @@ impl Board {
         &self.piles[i]
     }
 
-    fn mov(from: &Stack, to: &Stack, size: usize) {}
+    fn mov(from: &mut Stack, to: &mut Stack, size: usize) {
+        let mut temp = Stack::new();
+        for _ in 0..size {
+            temp.push(from.pop().expect("Out of range"));
+        }
+        for _ in 0..size {
+            to.push(temp.pop().expect("Out of range"));
+        }
+    }
 }

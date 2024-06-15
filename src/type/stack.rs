@@ -31,7 +31,7 @@ impl Stack {
         self.stack.last()
     }
 
-    fn shuffle(&mut self) {
+    pub fn shuffle(&mut self) {
         let mut rng = thread_rng();
         self.stack.shuffle(&mut rng);
     }

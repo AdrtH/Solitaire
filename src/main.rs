@@ -70,7 +70,7 @@ fn dislay_card(card: &Card, d: &mut RaylibDrawHandle, position: Rectangle) {
     }
 }
 
-fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: i32, y: i32) {
+fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: usize, y: usize) {
     let (card_width, card_height, hor_offset) = compute_card_dimensions(&d);
     let card_hor_offset = card_width * (1.0 - CARD_FILLING_PERC) / 2.0;
     let card_ver_offset = card_height * (1.0 - CARD_FILLING_PERC) / 2.0;
@@ -91,10 +91,10 @@ fn display_board(board: &Board, d: &mut RaylibDrawHandle) {
     display_stack(board.get_deck(), d, 0, 0);
     display_stack(board.get_playing(), d, 1, 0);
     for i in 0..NB_FOND {
-        display_stack(board.get_fondation(i), d, i as i32 + 3, 0);
+        display_stack(board.get_fondation(i), d, i + 3, 0);
     }
     for i in 0..NB_PILES {
-        display_stack(board.get_pile(i), d, i as i32, 1);
+        display_stack(board.get_pile(i), d, i, 1);
     }
 }
 
@@ -116,7 +116,4 @@ fn main() {
         // d.draw_text("Hello, world", 12, 12, 20, Color::BLACK);
         display_board(&board, &mut d);
     }
-    // let mut deck = create_deck();
-    // deck.shuffle();
-    // print_stack(deck);
 }

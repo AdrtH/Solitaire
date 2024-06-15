@@ -1,7 +1,9 @@
 use std::f32;
 
+use raylib::ffi::CheckCollisionPointRec;
 use raylib::ffi::DrawTexture;
 use raylib::ffi::Rectangle;
+use raylib::ffi::Texture;
 use raylib::prelude::*;
 
 pub mod r#type;
@@ -36,6 +38,38 @@ fn compute_card_dimensions(d: &RaylibDrawHandle) -> (f32, f32, f32) {
     (card_width, card_height, hor_offset)
 }
 
+fn int_to_color(x: u32) -> raylib::ffi::Color {
+    raylib::ffi::Color {
+        r: (x >> 24) as u8,
+        g: ((x << 8) >> 24) as u8,
+        b: ((x << 16) >> 24) as u8,
+        a: ((x << 24) >> 24) as u8,
+    }
+}
+
+fn dislay_card(card: &Card, d: &mut RaylibDrawHandle, position: Rectangle) {
+    let mut card_texture: Texture;
+    let tint = unsafe {
+        let mouse = d.get_mouse_position();
+        if CheckCollisionPointRec(mouse.into(), position) {
+            int_to_color(0xAAAAAAFF)
+        } else {
+            int_to_color(0xFFFFFFFF)
+        }
+    };
+    unsafe {
+        card_texture = CARD_BACK.unwrap();
+    }
+    if card.known {
+        println!("NOT IMPLEMENTED");
+    }
+    card_texture.height = position.height as i32;
+    card_texture.width = position.width as i32;
+    unsafe {
+        DrawTexture(card_texture, position.x as i32, position.y as i32, tint);
+    }
+}
+
 fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: i32, y: i32) {
     let (card_width, card_height, hor_offset) = compute_card_dimensions(&d);
     let card_hor_offset = card_width * (1.0 - CARD_FILLING_PERC) / 2.0;
@@ -49,25 +83,7 @@ fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: i32, y: i32) {
     if stack.is_empty() {
         d.draw_rectangle_rounded(position, 0.2, 10, Color::DARKGREEN);
     } else {
-        // TODO: factor out in display card
-        // so that you can easily check is known or not and change texture as needed
-        unsafe {
-            let mut t = CARD_BACK.unwrap();
-            t.height = position.height as i32;
-            t.width = position.width as i32;
-            DrawTexture(
-                t,
-                position.x as i32,
-                position.y as i32,
-                // TODO: find a better way to do this because raylib rs sucks
-                raylib::ffi::Color {
-                    r: 0xFF,
-                    g: 0xFF,
-                    b: 0xFF,
-                    a: 0xFF,
-                },
-            );
-        }
+        dislay_card(stack.peek().unwrap(), d, position);
     }
 }
 

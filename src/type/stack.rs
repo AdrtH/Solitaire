@@ -27,7 +27,7 @@ impl Stack {
         self.stack.len()
     }
 
-    fn peek(&self) -> Option<&Card> {
+    pub fn peek(&self) -> Option<&Card> {
         self.stack.last()
     }
 

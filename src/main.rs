@@ -1,10 +1,7 @@
 use std::f32;
-use std::os::raw::c_char;
 
 use raylib::ffi::DrawTexture;
-use raylib::ffi::LoadTexture;
 use raylib::ffi::Rectangle;
-use raylib::ffi::Texture2D;
 use raylib::prelude::*;
 
 pub mod r#type;
@@ -39,9 +36,6 @@ fn compute_card_dimensions(d: &RaylibDrawHandle) -> (f32, f32, f32) {
     (card_width, card_height, hor_offset)
 }
 
-// TODO: put textures in Card module
-static mut texture: Option<Texture2D> = None;
-
 fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: i32, y: i32) {
     let (card_width, card_height, hor_offset) = compute_card_dimensions(&d);
     let card_hor_offset = card_width * (1.0 - CARD_FILLING_PERC) / 2.0;
@@ -58,7 +52,7 @@ fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: i32, y: i32) {
         // TODO: factor out in display card
         // so that you can easily check is known or not and change texture as needed
         unsafe {
-            let mut t = texture.unwrap();
+            let mut t = CARD_BACK.unwrap();
             t.height = position.height as i32;
             t.width = position.width as i32;
             DrawTexture(
@@ -96,9 +90,7 @@ fn main() {
         .build();
     let board = Board::new();
     unsafe {
-        texture = Some(LoadTexture(
-            "cards/svg_playing_cards/backs/png_96_dpi/red2.png\0".as_ptr() as *const c_char,
-        ))
+        load_cards_texture();
     };
     // rl.load_render_texture(&thread, 50, 50);
     while !rl.window_should_close() {

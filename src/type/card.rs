@@ -1,3 +1,15 @@
+use raylib::ffi::LoadTexture;
+use raylib::ffi::Texture2D;
+use std::os::raw::c_char;
+
+pub static mut CARD_BACK: Option<Texture2D> = None;
+
+pub unsafe fn load_cards_texture() {
+    CARD_BACK = Some(LoadTexture(
+        "cards/svg_playing_cards/backs/png_96_dpi/red2.png\0".as_ptr() as *const c_char,
+    ));
+}
+
 #[derive(Clone, Copy)]
 pub enum Suit {
     CLUB,

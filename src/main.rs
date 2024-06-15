@@ -53,7 +53,7 @@ fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: i32, y: i32) {
         height: card_height * CARD_FILLING_PERC,
     };
     if stack.is_empty() {
-        d.draw_rectangle_rounded(position, 0.5, 10, Color::DARKGREEN);
+        d.draw_rectangle_rounded(position, 0.2, 10, Color::DARKGREEN);
     } else {
         // TODO: factor out in display card
         // so that you can easily check is known or not and change texture as needed

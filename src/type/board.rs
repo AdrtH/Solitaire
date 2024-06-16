@@ -49,12 +49,12 @@ impl Board {
         &self.playing
     }
 
-    pub fn get_fondation(&self, i: usize) -> &Stack {
-        &self.fondation[i]
+    pub fn get_fondation(&mut self, i: usize) -> &mut Stack {
+        &mut self.fondation[i]
     }
 
-    pub fn get_pile(&self, i: usize) -> &Stack {
-        &self.piles[i]
+    pub fn get_pile(&mut self, i: usize) -> &mut Stack {
+        &mut self.piles[i]
     }
 
     fn mov(from: &mut Stack, to: &mut Stack, size: usize) {
@@ -64,6 +64,18 @@ impl Board {
         }
         for _ in 0..size {
             to.push(temp.pop().expect("Out of range"));
+        }
+    }
+
+    pub fn update_known(&mut self) {
+        for i in 0..NB_PILES {
+            let card_opt = self.get_pile(i).pop();
+            if card_opt.is_none() {
+                continue;
+            }
+            let mut card = card_opt.unwrap();
+            card.known = true;
+            self.get_pile(i).push(card);
         }
     }
 }

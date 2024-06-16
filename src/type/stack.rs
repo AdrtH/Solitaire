@@ -2,6 +2,7 @@ use crate::*;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
+#[derive(Clone)]
 pub struct Stack {
     pub stack: Vec<Card>,
 }
@@ -23,7 +24,7 @@ impl Stack {
         self.stack.is_empty()
     }
 
-    fn length(&self) -> usize {
+    pub fn length(&self) -> usize {
         self.stack.len()
     }
 
@@ -34,6 +35,10 @@ impl Stack {
     pub fn shuffle(&mut self) {
         let mut rng = thread_rng();
         self.stack.shuffle(&mut rng);
+    }
+
+    pub fn as_vec(&self) -> Vec<Card> {
+        self.stack.to_vec()
     }
 }
 

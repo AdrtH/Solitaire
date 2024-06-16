@@ -1,3 +1,4 @@
+use std::cmp::min;
 use std::f32;
 
 use raylib::ffi::CheckCollisionPointRec;
@@ -47,30 +48,36 @@ fn int_to_color(x: u32) -> raylib::ffi::Color {
     }
 }
 
-fn dislay_card(card: &Card, d: &mut RaylibDrawHandle, position: Rectangle) {
+fn display_card(vis_card: &VisualCard, d: &mut RaylibDrawHandle) {
     let mut card_texture: Texture;
     let tint = unsafe {
         let mouse = d.get_mouse_position();
-        if CheckCollisionPointRec(mouse.into(), position) {
+        if CheckCollisionPointRec(mouse.into(), vis_card.collision) {
             int_to_color(0xAAAAAAFF)
         } else {
             int_to_color(0xFFFFFFFF)
         }
     };
-    unsafe {
-        card_texture = CARD_BACK.unwrap();
+    if vis_card.card.known {
+        card_texture = match_card_texture(vis_card.card);
+    } else {
+        unsafe {
+            card_texture = CARD_BACK.unwrap();
+        }
     }
-    if card.known {
-        println!("NOT IMPLEMENTED");
-    }
-    card_texture.height = position.height as i32;
-    card_texture.width = position.width as i32;
+    card_texture.height = vis_card.pos.height as i32;
+    card_texture.width = vis_card.pos.width as i32;
     unsafe {
-        DrawTexture(card_texture, position.x as i32, position.y as i32, tint);
+        DrawTexture(
+            card_texture,
+            vis_card.pos.x as i32,
+            vis_card.pos.y as i32,
+            tint,
+        );
     }
 }
 
-fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: usize, y: usize) {
+fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: usize, y: usize, stacked: bool) {
     let (card_width, card_height, hor_offset) = compute_card_dimensions(&d);
     let card_hor_offset = card_width * (1.0 - CARD_FILLING_PERC) / 2.0;
     let card_ver_offset = card_height * (1.0 - CARD_FILLING_PERC) / 2.0;
@@ -82,19 +89,56 @@ fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: usize, y: usize) {
     };
     if stack.is_empty() {
         d.draw_rectangle_rounded(position, 0.2, 10, Color::DARKGREEN);
+    } else if !stacked {
+        let card = VisualCard {
+            card: stack.peek().unwrap(),
+            pos: position,
+            collision: position,
+        };
+        display_card(&card, d);
     } else {
-        dislay_card(stack.peek().unwrap(), d, position);
+        let cards = stack.as_vec();
+        // TODO: fix the jumping effect when resizing the window
+        let mut stacked_card_offset = min(
+            (position.y / cards.len() as f32) as i32,
+            (card_height / 5.0) as i32,
+        ) as f32;
+        // TODO: find a better way to do this, and make it smooth
+        while cards.len() as f32 * stacked_card_offset + card_height + position.y
+            > d.get_screen_height() as f32
+        {
+            stacked_card_offset /= 1.2;
+        }
+        let mut pos = position;
+        for i in 0..cards.len() {
+            let card = VisualCard {
+                card: &cards[i],
+                pos,
+                collision: Rectangle {
+                    x: pos.x,
+                    y: pos.y,
+                    width: pos.width,
+                    height: if i < cards.len() - 1 {
+                        stacked_card_offset
+                    } else {
+                        pos.height
+                    },
+                },
+            };
+            display_card(&card, d);
+            pos.y += stacked_card_offset;
+        }
     }
 }
 
-fn display_board(board: &Board, d: &mut RaylibDrawHandle) {
-    display_stack(board.get_deck(), d, 0, 0);
-    display_stack(board.get_playing(), d, 1, 0);
+fn display_board(board: &mut Board, d: &mut RaylibDrawHandle) {
+    display_stack(board.get_deck(), d, 0, 0, false);
+    display_stack(board.get_playing(), d, 1, 0, false);
     for i in 0..NB_FOND {
-        display_stack(board.get_fondation(i), d, i + 3, 0);
+        display_stack(board.get_fondation(i), d, i + 3, 0, true);
     }
     for i in 0..NB_PILES {
-        display_stack(board.get_pile(i), d, i, 1);
+        display_stack(board.get_pile(i), d, i, 1, true);
     }
 }
 
@@ -104,16 +148,16 @@ fn main() {
         .size(900, 720)
         .resizable()
         .build();
-    let board = Board::new();
+    let mut board = Board::new();
     unsafe {
         load_cards_texture();
     };
     // rl.load_render_texture(&thread, 50, 50);
     while !rl.window_should_close() {
+        board.update_known();
         let mut d = rl.begin_drawing(&thread);
-
         d.clear_background(Color::GREEN);
         // d.draw_text("Hello, world", 12, 12, 20, Color::BLACK);
-        display_board(&board, &mut d);
+        display_board(&mut board, &mut d);
     }
 }

@@ -98,17 +98,10 @@ fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: usize, y: usize, st
         display_card(&card, d);
     } else {
         let cards = stack.as_vec();
-        // TODO: fix the jumping effect when resizing the window
-        let mut stacked_card_offset = min(
+        let stacked_card_offset = min(
             (position.y / cards.len() as f32) as i32,
             (card_height / 5.0) as i32,
         ) as f32;
-        // TODO: find a better way to do this, and make it smooth
-        while cards.len() as f32 * stacked_card_offset + card_height + position.y
-            > d.get_screen_height() as f32
-        {
-            stacked_card_offset /= 1.2;
-        }
         let mut pos = position;
         for i in 0..cards.len() {
             let card = VisualCard {
@@ -152,12 +145,10 @@ fn main() {
     unsafe {
         load_cards_texture();
     };
-    // rl.load_render_texture(&thread, 50, 50);
     while !rl.window_should_close() {
         board.update_known();
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::GREEN);
-        // d.draw_text("Hello, world", 12, 12, 20, Color::BLACK);
         display_board(&mut board, &mut d);
     }
 }

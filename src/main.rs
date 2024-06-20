@@ -77,7 +77,13 @@ fn display_card(vis_card: &VisualCard, d: &mut RaylibDrawHandle) {
     }
 }
 
-fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: usize, y: usize, stacked: bool) {
+fn display_stack(
+    stack: &Stack,
+    d: &mut RaylibDrawHandle,
+    x: usize,
+    y: usize,
+    stacked: bool,
+) -> Vec<Rectangle> {
     let (card_width, card_height, hor_offset) = compute_card_dimensions(&d);
     let card_hor_offset = card_width * (1.0 - CARD_FILLING_PERC) / 2.0;
     let card_ver_offset = card_height * (1.0 - CARD_FILLING_PERC) / 2.0;
@@ -89,6 +95,7 @@ fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: usize, y: usize, st
     };
     if stack.is_empty() {
         d.draw_rectangle_rounded(position, 0.2, 10, Color::DARKGREEN);
+        vec![position]
     } else if !stacked {
         let card = VisualCard {
             card: stack.peek().unwrap(),
@@ -96,6 +103,7 @@ fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: usize, y: usize, st
             collision: position,
         };
         display_card(&card, d);
+        vec![card.collision]
     } else {
         let cards = stack.as_vec();
         let stacked_card_offset = min(
@@ -103,6 +111,7 @@ fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: usize, y: usize, st
             (card_height / 5.0) as i32,
         ) as f32;
         let mut pos = position;
+        let mut vec = vec![];
         for i in 0..cards.len() {
             let card = VisualCard {
                 card: &cards[i],
@@ -120,19 +129,23 @@ fn display_stack(stack: &Stack, d: &mut RaylibDrawHandle, x: usize, y: usize, st
             };
             display_card(&card, d);
             pos.y += stacked_card_offset;
+            vec.push(card.collision);
         }
+        vec
     }
 }
 
-fn display_board(board: &mut Board, d: &mut RaylibDrawHandle) {
-    display_stack(board.get_deck(), d, 0, 0, false);
-    display_stack(board.get_playing(), d, 1, 0, false);
+fn display_board(board: &mut Board, d: &mut RaylibDrawHandle) -> BoardHitboxes {
+    let mut hitboxes = BoardHitboxes::new();
+    hitboxes.deck = display_stack(board.get_deck(), d, 0, 0, false)[0];
+    hitboxes.playing = display_stack(board.get_playing(), d, 1, 0, false)[0];
     for i in 0..NB_FOND {
-        display_stack(board.get_fondation(i), d, i + 3, 0, true);
+        hitboxes.fondation[i] = display_stack(board.get_fondation(i), d, i + 3, 0, false)[0];
     }
     for i in 0..NB_PILES {
-        display_stack(board.get_pile(i), d, i, 1, true);
+        hitboxes.stack[i] = display_stack(board.get_pile(i), d, i, 1, true);
     }
+    return hitboxes;
 }
 
 fn main() {
@@ -149,6 +162,10 @@ fn main() {
         board.update_known();
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::GREEN);
-        display_board(&mut board, &mut d);
+        let hitbox = display_board(&mut board, &mut d);
+        if d.is_mouse_button_released(MouseButton::MOUSE_LEFT_BUTTON) {
+            let click = hitbox.get_clicked(d.get_mouse_position());
+            board.handle_click(click);
+        }
     }
 }

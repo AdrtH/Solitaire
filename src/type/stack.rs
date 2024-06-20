@@ -12,6 +12,27 @@ impl Stack {
         Stack { stack: Vec::new() }
     }
 
+    pub fn set(&mut self, stack: Vec<Card>) {
+        self.stack = stack;
+    }
+
+    pub fn revert(&mut self) {
+        self.stack.reverse();
+    }
+
+    pub fn map<F>(self, op: F) -> Self
+    where
+        F: Fn(Card) -> Card,
+    {
+        let mut stack: Vec<Card> = vec![];
+        for e in self.stack {
+            stack.push(op(e));
+        }
+        let mut ret = Stack::new();
+        ret.set(stack);
+        ret
+    }
+
     pub fn pop(&mut self) -> Option<Card> {
         self.stack.pop()
     }

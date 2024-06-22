@@ -3,7 +3,7 @@ use crate::*;
 pub const NB_FOND: usize = 4;
 pub const NB_PILES: usize = 7;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum StackType {
     DECK,
     PLAYING,
@@ -12,6 +12,7 @@ pub enum StackType {
     NONE,
 }
 
+#[derive(Clone, Copy)]
 pub struct Click {
     stack_type: StackType,
     index: usize,
@@ -116,6 +117,27 @@ impl Board {
         self.playing = Stack::new();
     }
 
+    fn get_clicked_stack(&self, click: Click) -> Stack {
+        assert!(click.stack_type != StackType::NONE);
+        assert!(click.stack_type != StackType::DECK);
+        match click.stack_type {
+            StackType::PLAYING => self.playing.clone(),
+            StackType::PILES => self.piles[click.index].clone(),
+            StackType::FONDATION => self.fondation[click.index].clone(),
+            _ => self.playing.clone(),
+        }
+    }
+
+    fn set_clicked_stack(&mut self, stack: Stack, click: Click) {
+        assert!(click.stack_type != StackType::NONE);
+        match click.stack_type {
+            StackType::PLAYING => self.playing = stack,
+            StackType::PILES => self.piles[click.index] = stack,
+            StackType::FONDATION => self.fondation[click.index] = stack,
+            _ => self.playing = stack,
+        };
+    }
+
     pub fn handle_click(&mut self, click: Click) {
         if click.stack_type == StackType::DECK {
             if self.deck.length() > 0 {
@@ -123,7 +145,46 @@ impl Board {
             } else {
                 self.refill();
             }
+            // if we click on the deck, we should forget what was the last clicked stack
+            self.click = Click {
+                stack_type: StackType::NONE,
+                index: 0,
+                card: 0,
+            };
+            return;
         }
+        // if we haven't got any click saved, we save this one for next time
+        if self.click.stack_type == StackType::NONE {
+            self.click = click;
+            return;
+        }
+        if click.stack_type == StackType::NONE {
+            self.click = click;
+            return;
+        }
+        // We should not be able to move anything to the playing stack
+        if click.stack_type == StackType::PLAYING {
+            self.click = click;
+            return;
+        }
+        let mut click_from = self.click.clone();
+        let mut stack_from = self.get_clicked_stack(self.click);
+        let mut stack_to = self.get_clicked_stack(click);
+        // we can't know which card is the last one before any of this
+        if self.click.stack_type != StackType::PILES {
+            click_from.card = stack_from.length() - 1;
+        }
+        let card_number = stack_from.length() - click_from.card;
+        // TODO: make a function that test wether the move is allowed by the rules
+        // probably smth like Stack::is_allowed(card, stack_type, stack) -> bool
+        Board::mov(&mut stack_from, &mut stack_to, card_number);
+        self.set_clicked_stack(stack_to, click);
+        self.set_clicked_stack(stack_from, self.click);
+        self.click = Click {
+            stack_type: StackType::NONE,
+            index: 0,
+            card: 0,
+        };
     }
 }
 

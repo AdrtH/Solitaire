@@ -23,5 +23,12 @@ cargo install --path .
 After running it, you'll be directly on a game, you can start a new game using R and Escape to quit.
 Currently, this does not support drag and drop for moving, so you need to click to move.
 
+# Contributing
+You are free to contribute to this, I will not accept code I find too messy, or people trying to refactor everything to be more "Rusty".
+Try to stay as close to my way of doing things as possible.
+
+Feel free to open a new issue if you find a bug, and/or a PR that fixes it.
+
 # Legal things
-No modifications were made to neither Raylib nor its rust binding.
+No modifications were made to neither [Raylib](https://www.raylib.com/) nor its [rust binding](https://github.com/deltaphc/raylib-rs).
+Feel free to reach out if any legal mention isn't correct or missing.

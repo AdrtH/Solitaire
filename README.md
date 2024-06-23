@@ -1,5 +1,5 @@
 # Solitaire
-A Klondike game, written in [Rust](https://www.rust-lang.org/), using [Raylib](https://www.raylib.com/) and its [rust binding](https://github.com/deltaphc/raylib-rs).
+A Klondike game, written in [Rust](https://www.rust-lang.org/), using [Raylib](https://www.raylib.com/) and its [rust bindings](https://github.com/deltaphc/raylib-rs).
 
 # How to build it
 You will need [Cargo](https://doc.rust-lang.org/cargo/) and [Raylib](https://www.raylib.com/) installed on your machine, I won't detail how to install neither of them, go to their dedicated website, both are well documented.
@@ -25,10 +25,14 @@ Currently, this does not support drag and drop for moving, so you need to click 
 
 # Contributing
 You are free to contribute to this, I will not accept code I find too messy, or people trying to refactor everything to be more "Rusty".
+
 Try to stay as close to my way of doing things as possible.
 
 Feel free to open a new issue if you find a bug, and/or a PR that fixes it.
 
 # Legal things
-No modifications were made to neither [Raylib](https://www.raylib.com/) nor its [rust binding](https://github.com/deltaphc/raylib-rs).
+No modifications were made to neither [Raylib](https://www.raylib.com/) nor its [rust bindings](https://github.com/deltaphc/raylib-rs).
+
+The playing cards are provided by https://www.tekeye.uk/playing_cards/svg-playing-cards. Thanks for their work.
+
 Feel free to reach out if any legal mention isn't correct or missing.

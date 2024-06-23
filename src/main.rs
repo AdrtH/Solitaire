@@ -93,6 +93,12 @@ fn display_stack(
         width: card_width * CARD_FILLING_PERC,
         height: card_height * CARD_FILLING_PERC,
     };
+    const NO_HITBOX: Rectangle = Rectangle {
+        x: -1.0,
+        y: -1.0,
+        width: 0.0,
+        height: 0.0,
+    };
     if stack.is_empty() {
         d.draw_rectangle_rounded(position, 0.2, 10, Color::DARKGREEN);
         vec![position]
@@ -129,7 +135,11 @@ fn display_stack(
             };
             display_card(&card, d);
             pos.y += stacked_card_offset;
-            vec.push(card.collision);
+            if card.card.known {
+                vec.push(card.collision);
+            } else {
+                vec.push(NO_HITBOX)
+            }
         }
         vec
     }

@@ -169,15 +169,20 @@ impl Board {
         }
         let mut click_from = self.click.clone();
         let mut stack_from = self.get_clicked_stack(self.click);
+        if stack_from.peek().is_none() {
+            return;
+        }
         let mut stack_to = self.get_clicked_stack(click);
         // we can't know which card is the last one before any of this
         if self.click.stack_type != StackType::PILES {
             click_from.card = stack_from.length() - 1;
         }
         let card_number = stack_from.length() - click_from.card;
-        if stack_to.is_mov_allowed(stack_from.stack[click_from.card], click.stack_type) {
-            Board::mov(&mut stack_from, &mut stack_to, card_number);
+        if !stack_to.is_mov_allowed(stack_from.stack[click_from.card], click.stack_type) {
+            self.click = click;
+            return;
         }
+        Board::mov(&mut stack_from, &mut stack_to, card_number);
         self.set_clicked_stack(stack_to, click);
         self.set_clicked_stack(stack_from, self.click);
         self.click = Click {

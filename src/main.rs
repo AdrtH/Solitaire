@@ -169,6 +169,10 @@ fn main() {
         load_cards_texture();
     };
     while !rl.window_should_close() {
+        rl.set_exit_key(Some(KeyboardKey::KEY_ESCAPE));
+        if rl.is_key_pressed(KeyboardKey::KEY_R) {
+            board = Board::new()
+        }
         board.update_known();
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::GREEN);

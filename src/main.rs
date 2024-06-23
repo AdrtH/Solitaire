@@ -1,3 +1,4 @@
+// AdrtH (c) 2024
 use std::cmp::min;
 use std::f32;
 

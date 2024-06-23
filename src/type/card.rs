@@ -1,3 +1,4 @@
+// AdrtH (C) 2024
 use raylib::ffi::LoadTexture;
 use raylib::ffi::Rectangle;
 use raylib::ffi::Texture2D;

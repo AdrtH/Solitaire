@@ -175,9 +175,9 @@ impl Board {
             click_from.card = stack_from.length() - 1;
         }
         let card_number = stack_from.length() - click_from.card;
-        // TODO: make a function that test wether the move is allowed by the rules
-        // probably smth like Stack::is_allowed(card, stack_type, stack) -> bool
-        Board::mov(&mut stack_from, &mut stack_to, card_number);
+        if stack_to.is_mov_allowed(stack_from.stack[click_from.card], click.stack_type) {
+            Board::mov(&mut stack_from, &mut stack_to, card_number);
+        }
         self.set_clicked_stack(stack_to, click);
         self.set_clicked_stack(stack_from, self.click);
         self.click = Click {

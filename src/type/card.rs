@@ -3,7 +3,6 @@ use raylib::ffi::Rectangle;
 use raylib::ffi::Texture2D;
 use std::collections::HashMap;
 use std::hash::Hash;
-use std::ops::Deref;
 use std::os::raw::c_char;
 
 pub static mut CARD_BACK: Option<Texture2D> = None;
@@ -67,6 +66,13 @@ pub enum Suit {
     HEART,
 }
 
+impl Suit {
+    // red is true, because I had to make a choice and red is my favorite color
+    pub fn to_color_as_bool(self) -> bool {
+        return self == Suit::DIAMOND || self == Suit::HEART;
+    }
+}
+
 #[derive(Clone, Copy, Hash)]
 pub struct Card {
     pub value: i16,
@@ -98,6 +104,11 @@ impl Card {
             _ => &string_val,
         };
         format!("{},{},{}", s, val, self.known)
+    }
+
+    pub fn is_stackable(card_high: Self, card_low: Self) -> bool {
+        card_high.value == card_low.value + 1
+            && card_high.suit.to_color_as_bool() != card_low.suit.to_color_as_bool()
     }
 }
 

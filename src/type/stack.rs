@@ -61,6 +61,27 @@ impl Stack {
     pub fn as_vec(&self) -> Vec<Card> {
         self.stack.to_vec()
     }
+
+    pub fn is_mov_allowed(&self, card: Card, stack_type: StackType) -> bool {
+        const KING_VALUE: i16 = 13;
+        match stack_type {
+            StackType::PILES => {
+                let card_stack = self.peek();
+                if card_stack.is_none() {
+                    return card.value == KING_VALUE;
+                }
+                Card::is_stackable(*card_stack.unwrap(), card)
+            }
+            StackType::FONDATION => {
+                let card_stack = self.peek();
+                if card_stack.is_none() {
+                    return card.value == 1;
+                }
+                card_stack.unwrap().value == card.value - 1 && card_stack.unwrap().suit == card.suit
+            }
+            _ => false,
+        }
+    }
 }
 
 pub fn create_deck() -> Stack {
